@@ -1,0 +1,2 @@
+# swiftpkg
+Swift Package generator
