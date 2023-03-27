@@ -1,5 +1,6 @@
 import ArgumentParser
 import Foundation
+import TOMLKit
 
 @main
 struct swiftpkg: AsyncParsableCommand {
@@ -19,5 +20,7 @@ struct swiftpkg: AsyncParsableCommand {
 
 	mutating func run() async throws {
 		let input = try String(contentsOf: inputFile)
+		let package = try TOMLDecoder().decode(TOMLPackage.self, from: input)
+		print(package)
 	}
 }
