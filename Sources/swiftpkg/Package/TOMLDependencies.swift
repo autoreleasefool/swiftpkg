@@ -33,10 +33,21 @@ extension TOMLPackage {
 }
 
 extension TOMLPackage.Dependencies {
-	enum Version {
+	enum Version: CustomStringConvertible {
 		case from(String)
 		case revision(String)
 		case branch(String)
+
+		var description: String {
+			switch self {
+			case let .from(from):
+				return "from: \"\(from)\""
+			case let .revision(revision):
+				return "revision: \"\(revision)\""
+			case let .branch(branch):
+				return "branch: \"\(branch)\""
+			}
+		}
 	}
 }
 

@@ -14,4 +14,7 @@ let package = Package(
 		.library(name: "{{ target.name }}", targets: ["{{ target.name }}"]),{% endfor %}{% if not forloop.last %}
 {% endif %}{% endfor %}
 	],
+	dependencies: [{% for dependency in dependencies %}
+		.package(url: "{{ dependency.url }}", {{ dependency.versionString }}),{% endfor %}
+	],
 )

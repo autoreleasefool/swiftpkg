@@ -1,7 +1,9 @@
 struct Context {
 	let package: PackageDefinition
 	let platforms: [(platform: String, supported: [String])]
-	let products: [(kind: String, targets: [Target])]
+	let dependencies: [Dependency]
+	let targets: [Target]
+	let products: [(kind: String, products: [TargetDefinition])]
 
 	init(_ package: TOMLPackage) throws {
 		self.package = .init(
@@ -11,7 +13,21 @@ struct Context {
 		)
 
 		self.platforms = package.platforms.map { ($0.key, $0.value.supported) }
-		self.products = Target.Kind.allCases.map { ($0.rawValue, []) }
+
+		let targets: [Target] = []
+		self.targets = targets
+		self.products = TargetDefinition.Kind.allCases.map { kind in
+			(kind.rawValue, targets.filter { $0.target.kind == kind && $0.target.isProduct }.map(\.target))
+		}
+
+		let dependencies: [Dependency] = package.dependencies.map {
+			.init(url: $0.value.url, versionString: String(describing: $0.value.version))
+		}
+		self.dependencies = dependencies.sorted { $0.url.absoluteString < $1.url.absoluteString }
+
+		if self.dependencies != dependencies {
+			print("warning: dependencies are not sorted alphabetically")
+		}
 	}
 
 	func toDictionary() -> [String: Any] {
@@ -19,6 +35,7 @@ struct Context {
 			"package": package,
 			"platforms": platforms,
 			"products": products,
+			"dependencies": dependencies,
 		]
 	}
 }

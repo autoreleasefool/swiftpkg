@@ -1,4 +1,6 @@
-struct Dependency: Hashable {
-	let name: String
-	let package: String
+import Foundation
+
+struct Dependency: Equatable {
+	let url: URL
+	let versionString: String
 }
