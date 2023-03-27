@@ -1,8 +1,23 @@
+import ArgumentParser
+import Foundation
+
 @main
-public struct swiftpkg {
-	public private(set) var text = "Hello, World!"
-	
-	public static func main() {
-		print(swiftpkg().text)
+struct swiftpkg: AsyncParsableCommand {
+	@Argument(
+		help: "A file to import a TOML-defined Package.swift",
+		completion: .file(extensions: ["toml"]),
+		transform: URL.init(fileURLWithPath:)
+	)
+	var inputFile: URL
+
+	@Argument(
+		help: "Output file for the Package.swift",
+		completion: .file(),
+		transform: URL.init(fileURLWithPath:)
+	)
+	var ouputFile: URL
+
+	mutating func run() async throws {
+		let input = try String(contentsOf: inputFile)
 	}
 }
