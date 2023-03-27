@@ -1,6 +1,7 @@
 struct Context {
 	let package: PackageDefinition
-	let platforms: [String: Platform]
+	let platforms: [(platform: String, supported: [String])]
+	let products: [(kind: String, targets: [Target])]
 
 	init(_ package: TOMLPackage) throws {
 		self.package = .init(
@@ -9,15 +10,15 @@ struct Context {
 			defaultLocalization: package.defaultLocalization
 		)
 
-		self.platforms = Dictionary(
-			uniqueKeysWithValues: package.platforms.map { ($0.key, .init(supported: $0.value.supported)) }
-		)
+		self.platforms = package.platforms.map { ($0.key, $0.value.supported) }
+		self.products = Target.Kind.allCases.map { ($0.rawValue, []) }
 	}
 
 	func toDictionary() -> [String: Any] {
 		[
 			"package": package,
 			"platforms": platforms,
+			"products": products,
 		]
 	}
 }
