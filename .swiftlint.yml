@@ -12,3 +12,6 @@ trailing_comma:
 disabled_rules:
   - identifier_name
   - nesting
+
+opt_in_rules:
+  - sorted_imports

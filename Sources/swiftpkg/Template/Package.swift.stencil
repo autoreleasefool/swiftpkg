@@ -1,0 +1,12 @@
+// swift-tools-version: {{ package.toolsVersion }}
+// swiftlint:disable file_length line_length
+
+import PackageDescription
+
+let package = Package(
+	name: "{{ package.name }}",
+	defaultLocalization: "{{ package.defaultLocalization }}",
+	platforms: [{% for key, platform in package.platforms %}
+		.{{ key }}({% for version in platform.supported %}{{ version }}{% if not forloop.last %}, {% endif %}{% endfor %}),{% endfor %}
+	],
+)
