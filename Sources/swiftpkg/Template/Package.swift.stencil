@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
 	name: "{{ package.name }}",
 	defaultLocalization: "{{ package.defaultLocalization }}",
-	platforms: [{% for key, platform in package.platforms %}
+	platforms: [{% for key, platform in platforms %}
 		.{{ key }}({% for version in platform.supported %}{{ version }}{% if not forloop.last %}, {% endif %}{% endfor %}),{% endfor %}
 	],
 )

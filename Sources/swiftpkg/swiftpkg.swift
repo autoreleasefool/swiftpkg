@@ -28,9 +28,11 @@ struct swiftpkg: AsyncParsableCommand {
 			loader: FileSystemLoader(bundle: [Bundle.main, Bundle.module])
 		)
 
+		let context = try Context(package)
+
 		let rendered = try environment.renderTemplate(
 			name: "Template/Package.swift.stencil",
-			context: ["package": package]
+			context: context.toDictionary()
 		)
 
 		try rendered.data(using: .utf8)?.write(to: outputFile)
