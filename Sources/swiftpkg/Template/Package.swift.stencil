@@ -15,6 +15,6 @@ let package = Package(
 {% endif %}{% endfor %}
 	],
 	dependencies: [{% for dependency in dependencies %}
-		.package(url: "{{ dependency.url }}", {{ dependency.versionString }}),{% endfor %}
+		.package(url: "{{ dependency.url }}", {{ dependency.version }}),{% endfor %}
 	],
 )

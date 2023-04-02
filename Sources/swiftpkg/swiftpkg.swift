@@ -21,14 +21,13 @@ struct swiftpkg: AsyncParsableCommand {
 
 	mutating func run() async throws {
 		let input = try String(contentsOf: inputFile)
-		let package = try TOMLDecoder().decode(TOMLPackage.self, from: input)
-		print(package)
+
+		let table = try TOMLTable(string: input)
+		let context = try Context(table)
 
 		let environment = Environment(
 			loader: FileSystemLoader(bundle: [Bundle.main, Bundle.module])
 		)
-
-		let context = try Context(package)
 
 		let rendered = try environment.renderTemplate(
 			name: "Template/Package.swift.stencil",
