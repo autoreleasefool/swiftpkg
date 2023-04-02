@@ -27,13 +27,13 @@ struct Target {
 			throw DependencyError.unsupportedTargetDependency(target.kind, dependency: dependency.kind)
 		}
 
-		switch dependency.modifier {
+		switch dependency.qualifier {
 		case .interface:
 			break
 		case .test:
 			throw DependencyError.targetingTestDependency
 		case .none:
-			guard !dependency.kind.dependencyRequiresInterface else {
+			guard !dependency.kind.requiresInterface else {
 				throw DependencyError.unsupportedTargetDependency(target.kind, dependency: dependency.kind)
 			}
 		}

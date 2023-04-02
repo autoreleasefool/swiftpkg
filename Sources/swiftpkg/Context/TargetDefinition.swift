@@ -1,24 +1,48 @@
 import Foundation
+import TOMLKit
 
 struct TargetDefinition {
 	let name: String
 	let kind: Kind
-	let modifier: Modifier?
-	let isProduct: Bool
+	let qualifier: Qualifier?
+	let skipTests: Bool
+
+	var interface: TargetDefinition? {
+		return kind.requiresInterface
+			? .init(name: "\(name)Interface", kind: kind, qualifier: .interface, skipTests: true)
+			: nil
+	}
+
+	var tests: TargetDefinition? {
+		return skipTests
+			? nil
+		: .init(name: "\(name)Tests", kind: kind, qualifier: .test, skipTests: true)
+	}
 }
 
 extension TargetDefinition {
-	enum Kind: String, CaseIterable {
-		case feature = "Features"
-		case repository = "Repositories"
-		case service = "Services"
-		case library = "Libraries"
+	enum Kind: CaseIterable {
+		case feature
+//		case repository
+		case dataProvider
+		case service
+		case library
 
-		var dependencyRequiresInterface: Bool {
+		var key: String {
+			switch self {
+			case .feature: return "features"
+//			case .repository: return "repositories"
+			case .dataProvider: return "dataProviders"
+			case .service: return "services"
+			case .library: return "libraries"
+			}
+		}
+
+		var requiresInterface: Bool {
 			switch self {
 			case .feature, .library:
 				return false
-			case .service, .repository:
+			case .service, .dataProvider:
 				return true
 			}
 		}
@@ -26,9 +50,9 @@ extension TargetDefinition {
 		var supportedDependencies: [Kind] {
 			switch self {
 			case .feature:
-				return [.feature, .repository, .service, .library]
-			case .repository:
-				return [.repository, .service, .library]
+				return [.feature, .dataProvider, .service, .library]
+			case .dataProvider:
+				return [.dataProvider, .service, .library]
 			case .service:
 				return [.service, .library]
 			case .library:
@@ -39,7 +63,7 @@ extension TargetDefinition {
 }
 
 extension TargetDefinition {
-	enum Modifier {
+	enum Qualifier {
 		case test
 		case interface
 	}

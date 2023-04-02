@@ -6,8 +6,8 @@ import PackageDescription
 let package = Package(
 	name: "{{ package.name }}",
 	defaultLocalization: "{{ package.defaultLocalization }}",
-	platforms: [{% for platform, supported in platforms %}
-		.{{ platform }}({% for version in supported %}{{ version }}{% if not forloop.last %}, {% endif %}{% endfor %}),{% endfor %}
+	platforms: [{% for platform in platforms %}
+		.{{ platform.name }}({% for version in platform.supportedVersions %}{{ version }}{% if not forloop.last %}, {% endif %}{% endfor %}),{% endfor %}
 	],
 	products: [{% for kind, targets in products %}
 		// MARK: - {{ kind }}{% for target in targets %}

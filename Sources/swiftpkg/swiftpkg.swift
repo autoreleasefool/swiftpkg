@@ -30,7 +30,7 @@ struct swiftpkg: AsyncParsableCommand {
 		)
 
 		let rendered = try environment.renderTemplate(
-			name: "Template/Package.swift.stencil",
+			name: "Contents/Resources/Template/Package.swift.stencil",
 			context: context.toDictionary()
 		)
 
