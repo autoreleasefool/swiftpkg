@@ -2,10 +2,12 @@ import Foundation
 import TOMLKit
 
 struct Dependency: Hashable {
+	let name: String
 	let url: URL
 	let version: Version
 
-	init(_ table: TOMLTable) throws {
+	init(name: String, table: TOMLTable) throws {
+		self.name = name
 		self.url = try table.requireURL("url")
 		if table.contains(key: "from") {
 			self.version = .from(try table.requireString("from"))

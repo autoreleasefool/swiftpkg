@@ -12,7 +12,7 @@ struct Context {
 		if table.contains(key: "dependencies") {
 			let dependenciesTable = try table.requireTable("dependencies")
 			self.dependencies = try dependenciesTable.keys.map {
-				try .init(dependenciesTable.requireTable($0))
+				try .init(name: $0, table: dependenciesTable.requireTable($0))
 			}.sorted { $0.url.absoluteString.lowercased() < $1.url.absoluteString.lowercased() }
 		} else {
 			self.dependencies = []
@@ -27,28 +27,49 @@ struct Context {
 			self.platforms = []
 		}
 
-		var targetDefinitions: [TargetDefinition] = []
+		var targetDefinitions: [TargetDefinition.Kind: [String: TargetDefinition]] = [:]
+		var targets: [Target] = []
+
 		for kind in TargetDefinition.Kind.allCases {
+			targetDefinitions[kind] = [:]
 			guard table.contains(key: kind.key) else { continue }
 			let kindTable = try table.requireTable(kind.key)
 			for targetKey in kindTable.keys {
+				guard targetDefinitions[kind]?[targetKey] == nil else {
+					throw DuplicateTargetError(targetName: targetKey)
+				}
+
 				let targetTable = try kindTable.requireTable(targetKey)
 				let skipTests = targetTable["skip_tests"]?.bool ?? false
-				let targetDefinition = TargetDefinition(name: targetKey, kind: kind, qualifier: nil, skipTests: skipTests)
 
-				targetDefinitions.append(targetDefinition)
-				if let interface = targetDefinition.interface {
-					targetDefinitions.append(interface)
+				let definition = TargetDefinition(name: targetKey, kind: kind, qualifier: nil)
+				var target = Target(target: definition)
+
+				if let interface = definition.interface {
+					targetDefinitions[kind]?[interface.name] = interface
+					try target.add(dependencyOn: interface)
+
+					let interfaceTarget = Target(target: interface)
+					targets.append(interfaceTarget)
 				}
 
-				if let tests = targetDefinition.tests {
-					targetDefinitions.append(tests)
+				if !skipTests {
+					let tests = definition.tests
+					targetDefinitions[kind]?[tests.name] = tests
+
+					var testTarget = Target(target: tests)
+					try testTarget.add(dependencyOn: definition)
 				}
+
+				targetDefinitions[kind]?[targetKey] = definition
+				targets.append(target)
 			}
 		}
-		print(targetDefinitions)
 
-		self.targets = []
+		print(targetDefinitions)
+		print(targets)
+
+		self.targets = targets
 	}
 
 	func toDictionary() -> [String: Any] {

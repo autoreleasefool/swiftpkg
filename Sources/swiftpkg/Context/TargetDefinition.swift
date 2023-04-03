@@ -1,22 +1,19 @@
 import Foundation
 import TOMLKit
 
-struct TargetDefinition {
+struct TargetDefinition: Hashable {
 	let name: String
 	let kind: Kind
 	let qualifier: Qualifier?
-	let skipTests: Bool
 
 	var interface: TargetDefinition? {
 		return kind.requiresInterface
-			? .init(name: "\(name)Interface", kind: kind, qualifier: .interface, skipTests: true)
+			? .init(name: "\(name)Interface", kind: kind, qualifier: .interface)
 			: nil
 	}
 
-	var tests: TargetDefinition? {
-		return skipTests
-			? nil
-		: .init(name: "\(name)Tests", kind: kind, qualifier: .test, skipTests: true)
+	var tests: TargetDefinition {
+		.init(name: "\(name)Tests", kind: kind, qualifier: .test)
 	}
 }
 
