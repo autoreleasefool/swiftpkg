@@ -14,9 +14,9 @@ struct Target {
 		case .interface, .none:
 			guard target.kind.supportedDependencies.contains(dependency.kind) else {
 				throw UnsupportedTargetDependencyError(
-					targetName: target.name,
+					targetName: target.fullyQualifiedName,
 					targetKind: target.kind,
-					dependencyName: dependency.name,
+					dependencyName: dependency.fullyQualifiedName,
 					dependencyKind: dependency.kind
 				)
 			}
@@ -25,13 +25,16 @@ struct Target {
 			case .interface:
 				break
 			case .test:
-				throw TestTargetDependencyError(targetName: target.name, dependencyName: dependency.name)
+				throw TestTargetDependencyError(
+					targetName: target.fullyQualifiedName,
+					dependencyName: dependency.fullyQualifiedName
+				)
 			case .none:
 				guard !dependency.kind.requiresInterface else {
 					throw UnsupportedTargetDependencyError(
-						targetName: target.name,
+						targetName: target.fullyQualifiedName,
 						targetKind: target.kind,
-						dependencyName: dependency.name,
+						dependencyName: dependency.fullyQualifiedName,
 						dependencyKind: dependency.kind
 					)
 				}
@@ -40,14 +43,20 @@ struct Target {
 			break
 		}
 
-		guard targetDependencies.insert(dependency.name).inserted else {
-			throw DuplicateDependencyError(targetName: target.name, dependencyName: dependency.name)
+		guard targetDependencies.insert(dependency.fullyQualifiedName).inserted else {
+			throw DuplicateDependencyError(
+				targetName: target.fullyQualifiedName,
+				dependencyName: dependency.fullyQualifiedName
+			)
 		}
 	}
 
 	mutating func add(dependencyOn dependency: Dependency) throws {
 		guard dependencies.insert(dependency.name).inserted else {
-			throw DuplicateDependencyError(targetName: target.name, dependencyName: dependency.name)
+			throw DuplicateDependencyError(
+				targetName: target.fullyQualifiedName,
+				dependencyName: dependency.name
+			)
 		}
 	}
 }

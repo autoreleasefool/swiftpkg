@@ -6,14 +6,28 @@ struct TargetDefinition: Hashable {
 	let kind: Kind
 	let qualifier: Qualifier?
 
+	var fullyQualifiedName: String {
+		let qualifierName: String
+		switch qualifier {
+		case .none:
+			qualifierName = ""
+		case .interface:
+			qualifierName = "Interface"
+		case .test:
+			qualifierName = "Tests"
+		}
+
+		return "\(name)\(kind.qualifiedName)\(qualifierName)"
+	}
+
 	var interface: TargetDefinition? {
 		return kind.requiresInterface
-			? .init(name: "\(name)Interface", kind: kind, qualifier: .interface)
+			? .init(name: name, kind: kind, qualifier: .interface)
 			: nil
 	}
 
 	var tests: TargetDefinition {
-		.init(name: "\(name)Tests", kind: kind, qualifier: .test)
+		.init(name: name, kind: kind, qualifier: .test)
 	}
 }
 
@@ -32,6 +46,15 @@ extension TargetDefinition {
 			case .dataProvider: return "dataProviders"
 			case .service: return "services"
 			case .library: return "libraries"
+			}
+		}
+
+		var qualifiedName: String {
+			switch self {
+			case .feature: return "Feature"
+			case .dataProvider: return "DataProvider"
+			case .service: return "Service"
+			case .library: return "Library"
 			}
 		}
 
