@@ -1,21 +1,21 @@
 import Foundation
 
-struct Target {
-	let target: TargetDefinition
+class Target {
+	let definition: TargetDefinition
 	private(set) var targetDependencies: Set<String> = []
 	private(set) var dependencies: Set<String> = []
 
-	init(target: TargetDefinition) {
-		self.target = target
+	init(definition: TargetDefinition) {
+		self.definition = definition
 	}
 
-	mutating func add(dependencyOn dependency: TargetDefinition) throws {
-		switch target.qualifier {
+	func add(dependencyOn dependency: TargetDefinition) throws {
+		switch definition.qualifier {
 		case .interface, .none:
-			guard target.kind.supportedDependencies.contains(dependency.kind) else {
+			guard definition.kind.supportedDependencies.contains(dependency.kind) else {
 				throw UnsupportedTargetDependencyError(
-					targetName: target.fullyQualifiedName,
-					targetKind: target.kind,
+					targetName: definition.fullyQualifiedName,
+					targetKind: definition.kind,
 					dependencyName: dependency.fullyQualifiedName,
 					dependencyKind: dependency.kind
 				)
@@ -26,14 +26,14 @@ struct Target {
 				break
 			case .test:
 				throw TestTargetDependencyError(
-					targetName: target.fullyQualifiedName,
+					targetName: definition.fullyQualifiedName,
 					dependencyName: dependency.fullyQualifiedName
 				)
 			case .none:
 				guard !dependency.kind.requiresInterface else {
 					throw UnsupportedTargetDependencyError(
-						targetName: target.fullyQualifiedName,
-						targetKind: target.kind,
+						targetName: definition.fullyQualifiedName,
+						targetKind: definition.kind,
 						dependencyName: dependency.fullyQualifiedName,
 						dependencyKind: dependency.kind
 					)
@@ -45,16 +45,16 @@ struct Target {
 
 		guard targetDependencies.insert(dependency.fullyQualifiedName).inserted else {
 			throw DuplicateDependencyError(
-				targetName: target.fullyQualifiedName,
+				targetName: definition.fullyQualifiedName,
 				dependencyName: dependency.fullyQualifiedName
 			)
 		}
 	}
 
-	mutating func add(dependencyOn dependency: Dependency) throws {
+	func add(dependencyOn dependency: Dependency) throws {
 		guard dependencies.insert(dependency.name).inserted else {
 			throw DuplicateDependencyError(
-				targetName: target.fullyQualifiedName,
+				targetName: definition.fullyQualifiedName,
 				dependencyName: dependency.name
 			)
 		}

@@ -39,6 +39,16 @@ extension TargetDefinition {
 		case service
 		case library
 
+		init?(key: String) {
+			switch key {
+			case "features": self = .feature
+			case "dataProviders": self = .dataProvider
+			case "services": self = .service
+			case "libraries": self = .library
+			default: return nil
+			}
+		}
+
 		var key: String {
 			switch self {
 			case .feature: return "features"
