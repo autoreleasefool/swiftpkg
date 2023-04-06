@@ -2,9 +2,19 @@ import Foundation
 import TOMLKit
 
 struct Dependency: Hashable {
+	private static let packageRegex = try! Regex("https://github\\.com/.*?/(.*)\\.git", as: (Substring, Substring).self)
+
 	let name: String
 	let url: URL
 	let version: Version
+
+	var asDependable: String {
+		".product(name: \"\(name)\", package: \"\(package)\")"
+	}
+
+	var package: String {
+		String(try! Self.packageRegex.wholeMatch(in: url.absoluteString)?.output.1 ?? "")
+	}
 
 	init(name: String, table: TOMLTable) throws {
 		self.name = name

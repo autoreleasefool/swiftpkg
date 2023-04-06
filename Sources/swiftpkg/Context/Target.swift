@@ -55,7 +55,9 @@ class Target {
 			}
 		}
 
-		guard targetDependencies.insert(dependency.fullyQualifiedName).inserted else {
+		let inserted = targetDependencies.insert("\"\(dependency.fullyQualifiedName)\"").inserted
+
+		guard inserted || definition.fullyQualifiedName.contains(dependency.fullyQualifiedName) else {
 			throw DuplicateDependencyError(
 				targetName: definition.fullyQualifiedName,
 				dependencyName: dependency.fullyQualifiedName
@@ -64,7 +66,7 @@ class Target {
 	}
 
 	func add(dependencyOn dependency: Dependency) throws {
-		guard dependencies.insert(dependency.name).inserted else {
+		guard dependencies.insert(dependency.asDependable).inserted else {
 			throw DuplicateDependencyError(
 				targetName: definition.fullyQualifiedName,
 				dependencyName: dependency.name

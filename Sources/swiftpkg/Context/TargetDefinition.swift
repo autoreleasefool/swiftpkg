@@ -78,6 +78,15 @@ extension TargetDefinition {
 			}
 		}
 
+		var categoryName: String {
+			switch self {
+			case .feature: return "Features"
+			case .dataProvider: return "Data Providers"
+			case .service: return "Services"
+			case .library: return "Libraries"
+			}
+		}
+
 		var requiresInterface: Bool {
 			switch self {
 			case .feature, .library:
@@ -106,5 +115,16 @@ extension TargetDefinition {
 	enum Qualifier {
 		case test
 		case interface
+	}
+}
+
+extension Optional where Wrapped == TargetDefinition.Qualifier {
+	var targetType: String {
+		switch self {
+		case .interface, .none:
+			return "target"
+		case .test:
+			return "testTarget"
+		}
 	}
 }

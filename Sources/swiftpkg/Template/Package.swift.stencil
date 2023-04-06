@@ -17,4 +17,14 @@ let package = Package(
 	dependencies: [{% for dependency in dependencies %}
 		.package(url: "{{ dependency.url }}", {{ dependency.version }}),{% endfor %}
 	],
+	targets: [{% for kind, targets in targets %}
+		// MARK: - {{ kind }}{% for target, dependencies, type in targets %}
+		.{{ type }}(
+			name: "{{ target }}",
+			dependencies: [{% for dependency in dependencies %}
+				{{ dependency }},{% if forloop.last %}
+			{% endif %}{% empty %}{% endfor %}]
+		),{% endfor %}{% if not forloop.last %}
+{% endif %}{% endfor %}
+	]
 )

@@ -4,8 +4,8 @@ struct Context {
 	let package: PackageDefinition
 	let platforms: [Platform]
 	let dependencies: [Dependency]
-	let targets: [Target]
-	let products: [(String, [String])]
+	let targets: [(TargetDefinition.Kind, [Target])]
+	let products: [(TargetDefinition.Kind, [TargetDefinition])]
 
 	fileprivate static let reservedKeywords = Set([
 		"interface",
@@ -40,13 +40,11 @@ struct Context {
 		}
 
 		self.products = TargetDefinition.Kind.allCases.map { kind in
-			(
-				kind.qualifiedName,
-				targets.filter { $0.definition.kind == kind && $0.definition.isProduct }.map(\.definition.fullyQualifiedName)
-			)
+			(kind, targets.filter { $0.definition.kind == kind && $0.definition.isProduct }.map(\.definition))
 		}
-		print(products)
-		self.targets = targets
+		self.targets = TargetDefinition.Kind.allCases.map { kind in
+			(kind, targets.filter { $0.definition.kind == kind })
+		}
 	}
 
 	func toDictionary() -> [String: Any] {
@@ -54,8 +52,14 @@ struct Context {
 			"package": package,
 			"platforms": platforms,
 			"dependencies": dependencies,
-			"targets": targets,
-			"products": products,
+			"targets": targets.map { ($0.categoryName, $1.map {
+				(
+					name: $0.definition.fullyQualifiedName,
+					dependencies: $0.dependencies.sorted() + $0.targetDependencies.sorted(),
+					targetType: $0.definition.qualifier.targetType
+				)
+			}) },
+			"products": products.map { ($0.categoryName, $1.map(\.fullyQualifiedName)) },
 		]
 	}
 }
@@ -92,7 +96,7 @@ extension Context {
 				let target = Target(definition: definition)
 
 				if let interface = definition.interface {
-					definitions[kind]?[interface.name] = interface
+//					definitions[kind]?[interface.name] = interface
 					try target.add(dependencyOn: interface)
 
 					let interfaceTarget = Target(definition: interface)
@@ -101,10 +105,11 @@ extension Context {
 
 				if !skipTests {
 					let tests = definition.tests
-					definitions[kind]?[tests.name] = tests
+//					definitions[kind]?[tests.name] = tests
 
 					let testTarget = Target(definition: tests)
 					try testTarget.add(dependencyOn: definition)
+					targets.append(testTarget)
 				}
 
 				definitions[kind]?[targetKey] = definition
