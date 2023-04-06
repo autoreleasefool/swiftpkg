@@ -4,9 +4,9 @@ extension Context {
 	static func parseDefinitions(
 		_ dependencies: [Dependency],
 		_ table: TOMLTable
-	) throws -> ([TargetDefinition.Kind: [String: TargetDefinition]], [Target]) {
+	) throws -> ([TargetDefinition.Kind: [String: TargetDefinition]], [String: Target]) {
 		var definitions: [TargetDefinition.Kind: [String: TargetDefinition]] = [:]
-		var targets: [Target] = []
+		var targets: [String: Target] = [:]
 
 		for kind in TargetDefinition.Kind.allCases {
 			definitions[kind] = [:]
@@ -33,7 +33,7 @@ extension Context {
 					try target.add(dependencyOn: interface)
 
 					let interfaceTarget = Target(definition: interface)
-					targets.append(interfaceTarget)
+					targets[interfaceTarget.definition.fullyQualifiedName] = interfaceTarget
 				}
 
 				if !skipTests {
@@ -41,11 +41,11 @@ extension Context {
 
 					let testTarget = Target(definition: tests)
 					try testTarget.add(dependencyOn: definition)
-					targets.append(testTarget)
+					targets[testTarget.definition.fullyQualifiedName] = testTarget
 				}
 
 				definitions[kind]?[targetKey] = definition
-				targets.append(target)
+				targets[definition.fullyQualifiedName] = target
 			}
 		}
 
@@ -55,12 +55,12 @@ extension Context {
 	}
 
 	static func expandDependencies(
-		_ targets: [Target],
+		_ targets: [String: Target],
 		_ definitions: [TargetDefinition.Kind: [String: TargetDefinition]],
 		_ packageDependencies: [Dependency],
 		_ table: TOMLTable
 	) throws {
-		for target in targets {
+		for target in targets.values {
 			let rootKey = "\(target.definition.kind).\(target.definition.name)"
 
 			let kindTable = try table.requireTable(target.definition.kind.key)

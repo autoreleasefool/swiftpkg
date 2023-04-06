@@ -2,7 +2,7 @@ import TOMLKit
 
 extension Context {
 	static func parseDefaults(
-		_ targets: [Target],
+		_ targets: [String: Target],
 		_ definitions: [TargetDefinition.Kind: [String: TargetDefinition]],
 		_ dependencies: [Dependency],
 		_ table: TOMLTable
@@ -34,7 +34,7 @@ extension Context {
 	static func parseDefaults(
 		forKind: TargetDefinition.Kind,
 		withQualifier: TargetDefinition.Qualifier?,
-		_ targets: [Target],
+		_ targets: [String: Target],
 		_ definitions: [TargetDefinition.Kind: [String: TargetDefinition]],
 		_ packageDependencies: [Dependency],
 		_ table: TOMLTable
@@ -48,7 +48,8 @@ extension Context {
 				return dependency
 			}
 
-			for target in targets where target.definition.kind == forKind && target.definition.qualifier == withQualifier {
+			for target in targets.values
+				where target.definition.kind == forKind && target.definition.qualifier == withQualifier {
 				for dependency in dependencies {
 					try target.add(dependencyOn: dependency)
 				}
@@ -71,7 +72,8 @@ extension Context {
 				return dependency
 			}
 
-			for target in targets where target.definition.kind == forKind && target.definition.qualifier == withQualifier {
+			for target in targets.values
+				where target.definition.kind == forKind && target.definition.qualifier == withQualifier {
 				for dependency in dependencies {
 					try target.add(dependencyOn: dependency)
 				}
