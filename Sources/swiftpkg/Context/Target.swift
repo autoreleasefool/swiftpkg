@@ -43,6 +43,18 @@ class Target {
 			break
 		}
 
+		if let suitableForDependentsMatching = dependency.suitableForDependentsMatching,
+				let suitableRegex = try? Regex(suitableForDependentsMatching) {
+			guard definition.fullyQualifiedName.wholeMatch(of: suitableRegex) != nil else {
+				throw UnsupportedTargetDependencyError(
+					targetName: definition.fullyQualifiedName,
+					targetKind: definition.kind,
+					dependencyName: dependency.fullyQualifiedName,
+					dependencyKind: dependency.kind
+				)
+			}
+		}
+
 		guard targetDependencies.insert(dependency.fullyQualifiedName).inserted else {
 			throw DuplicateDependencyError(
 				targetName: definition.fullyQualifiedName,

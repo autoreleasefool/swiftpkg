@@ -11,7 +11,7 @@ let package = Package(
 	],
 	products: [{% for kind, targets in products %}
 		// MARK: - {{ kind }}{% for target in targets %}
-		.library(name: "{{ target.name }}", targets: ["{{ target.name }}"]),{% endfor %}{% if not forloop.last %}
+		.library(name: "{{ target }}", targets: ["{{ target }}"]),{% endfor %}{% if not forloop.last %}
 {% endif %}{% endfor %}
 	],
 	dependencies: [{% for dependency in dependencies %}

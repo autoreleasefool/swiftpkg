@@ -5,6 +5,7 @@ struct TargetDefinition: Hashable {
 	let name: String
 	let kind: Kind
 	let qualifier: Qualifier?
+	let suitableForDependentsMatching: String?
 
 	var fullyQualifiedName: String {
 		let qualifierName: String
@@ -22,12 +23,21 @@ struct TargetDefinition: Hashable {
 
 	var interface: TargetDefinition? {
 		return kind.requiresInterface
-			? .init(name: name, kind: kind, qualifier: .interface)
+			? .init(name: name, kind: kind, qualifier: .interface, suitableForDependentsMatching: suitableForDependentsMatching)
 			: nil
 	}
 
 	var tests: TargetDefinition {
-		.init(name: name, kind: kind, qualifier: .test)
+		.init(name: name, kind: kind, qualifier: .test, suitableForDependentsMatching: suitableForDependentsMatching)
+	}
+
+	var isProduct: Bool {
+		switch qualifier {
+		case .none, .interface:
+			return true
+		case .test:
+			return false
+		}
 	}
 }
 

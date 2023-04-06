@@ -5,6 +5,15 @@ struct Context {
 	let platforms: [Platform]
 	let dependencies: [Dependency]
 	let targets: [Target]
+	let products: [(String, [String])]
+
+	fileprivate static let reservedKeywords = Set([
+		"interface",
+		"tests",
+		"dependencies",
+		"skip_tests",
+		"suitable_for_dependents_matching",
+	])
 
 	init(_ table: TOMLTable) throws {
 		self.package = try PackageDefinition(table)
@@ -23,6 +32,41 @@ struct Context {
 			self.platforms = []
 		}
 
+		var (definitions, targets) = try Self.parseDefinitions(dependencies, table)
+		targets = targets.sorted { $0.definition.fullyQualifiedName < $1.definition.fullyQualifiedName }
+
+		if table.contains(key: "defaults") {
+			try Self.parseDefaults(targets, definitions, dependencies, table.requireTable("defaults"))
+		}
+
+		self.products = TargetDefinition.Kind.allCases.map { kind in
+			(
+				kind.qualifiedName,
+				targets.filter { $0.definition.kind == kind && $0.definition.isProduct }.map(\.definition.fullyQualifiedName)
+			)
+		}
+		print(products)
+		self.targets = targets
+	}
+
+	func toDictionary() -> [String: Any] {
+		[
+			"package": package,
+			"platforms": platforms,
+			"dependencies": dependencies,
+			"targets": targets,
+			"products": products,
+		]
+	}
+}
+
+// MARK: - Targets
+
+extension Context {
+	private static func parseDefinitions(
+		_ dependencies: [Dependency],
+		_ table: TOMLTable
+	) throws -> ([TargetDefinition.Kind: [String: TargetDefinition]], [Target]) {
 		var definitions: [TargetDefinition.Kind: [String: TargetDefinition]] = [:]
 		var targets: [Target] = []
 
@@ -37,8 +81,14 @@ struct Context {
 
 				let targetTable = try kindTable.requireTable(targetKey)
 				let skipTests = targetTable["skip_tests"]?.bool ?? false
+				let suitableForDependentsMatching = targetTable["suitable_for_dependents_matching"]?.string ?? nil
 
-				let definition = TargetDefinition(name: targetKey, kind: kind, qualifier: nil)
+				let definition = TargetDefinition(
+					name: targetKey,
+					kind: kind,
+					qualifier: nil,
+					suitableForDependentsMatching: suitableForDependentsMatching
+				)
 				let target = Target(definition: definition)
 
 				if let interface = definition.interface {
@@ -62,22 +112,74 @@ struct Context {
 			}
 		}
 
-		if table.contains(key: "defaults") {
-			try Self.parseDefaults(targets, definitions, dependencies, table.requireTable("defaults"))
-		}
-
 		print(definitions)
-		print(targets)
+		try Self.expandDependencies(targets, definitions, dependencies, table)
 
-		self.targets = targets
+		return (definitions, targets)
 	}
 
-	func toDictionary() -> [String: Any] {
-		[
-			"package": package,
-			"platforms": platforms,
-			"dependencies": dependencies,
-		]
+	private static func expandDependencies(
+		_ targets: [Target],
+		_ definitions: [TargetDefinition.Kind: [String: TargetDefinition]],
+		_ packageDependencies: [Dependency],
+		_ table: TOMLTable
+	) throws {
+		for target in targets {
+			let rootKey = "\(target.definition.kind).\(target.definition.name)"
+
+			let kindTable = try table.requireTable(target.definition.kind.key)
+			let targetTable: TOMLTable?
+			switch target.definition.qualifier {
+			case .none:
+				targetTable = try? kindTable.requireTable(target.definition.name)
+			case .interface:
+				targetTable = try? kindTable.requireTable("\(target.definition.name).interface")
+			case .test:
+				targetTable = try? kindTable.requireTable("\(target.definition.name).tests")
+			}
+
+			guard let targetTable else { continue }
+
+			print(rootKey)
+			if targetTable.contains(key: "dependencies") {
+				let dependencies = try targetTable.requireStringArray("dependencies").map { name in
+					guard let dependency = packageDependencies.first(where: { $0.name == name }) else {
+						throw UndefinedDependencyError(targetName: rootKey, dependencyName: name)
+					}
+					return dependency
+				}
+
+				for dependency in dependencies {
+					try target.add(dependencyOn: dependency)
+				}
+			}
+
+			for key in targetTable.keys where !reservedKeywords.contains(key) {
+				guard let kind = TargetDefinition.Kind(key: key) else {
+					throw InvalidValueTypeError(
+						key: "\(rootKey).\(key)",
+						expectedType: TargetDefinition.Kind.allCases.map(\.key).joined(separator: ",")
+					)
+				}
+
+				print(targetTable)
+				print(key)
+
+				let dependencies = try targetTable.requireStringArray(key).map {
+					guard let dependency = definitions[kind]?[$0] else {
+						throw UndefinedDependencyError(
+							targetName: "\(rootKey).\(key)",
+							dependencyName: $0
+						)
+					}
+					return dependency.interface ?? dependency
+				}
+
+				for dependency in dependencies {
+					try target.add(dependencyOn: dependency)
+				}
+			}
+		}
 	}
 }
 
@@ -138,7 +240,7 @@ extension Context {
 			}
 		}
 
-		for key in table.keys where !["tests", "interface", "dependencies"].contains(key) {
+		for key in table.keys where !reservedKeywords.contains(key) {
 			guard let kind = TargetDefinition.Kind(key: key) else {
 				throw InvalidValueTypeError(
 					key: "defaults.\(forKind.key).\(key)",
