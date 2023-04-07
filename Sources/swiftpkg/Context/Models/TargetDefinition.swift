@@ -44,7 +44,7 @@ struct TargetDefinition: Hashable {
 extension TargetDefinition {
 	enum Kind: CaseIterable {
 		case feature
-//		case repository
+		case repository
 		case dataProvider
 		case service
 		case library
@@ -53,6 +53,7 @@ extension TargetDefinition {
 			switch key {
 			case "features": self = .feature
 			case "dataProviders": self = .dataProvider
+			case "repositories": self = .repository
 			case "services": self = .service
 			case "libraries": self = .library
 			default: return nil
@@ -62,7 +63,7 @@ extension TargetDefinition {
 		var key: String {
 			switch self {
 			case .feature: return "features"
-//			case .repository: return "repositories"
+			case .repository: return "repositories"
 			case .dataProvider: return "dataProviders"
 			case .service: return "services"
 			case .library: return "libraries"
@@ -73,6 +74,7 @@ extension TargetDefinition {
 			switch self {
 			case .feature: return "Feature"
 			case .dataProvider: return "DataProvider"
+			case .repository: return "Repository"
 			case .service: return "Service"
 			case .library: return "Library"
 			}
@@ -82,6 +84,7 @@ extension TargetDefinition {
 			switch self {
 			case .feature: return "Features"
 			case .dataProvider: return "Data Providers"
+			case .repository: return "Repositories"
 			case .service: return "Services"
 			case .library: return "Libraries"
 			}
@@ -91,7 +94,7 @@ extension TargetDefinition {
 			switch self {
 			case .feature, .library:
 				return false
-			case .service, .dataProvider:
+			case .service, .dataProvider, .repository:
 				return true
 			}
 		}
@@ -99,9 +102,11 @@ extension TargetDefinition {
 		var supportedDependencies: [Kind] {
 			switch self {
 			case .feature:
-				return [.feature, .dataProvider, .service, .library]
+				return [.feature, .dataProvider, .repository, .service, .library]
 			case .dataProvider:
 				return [.dataProvider, .service, .library]
+			case .repository:
+				return [.repository, .service, .library]
 			case .service:
 				return [.service, .library]
 			case .library:
