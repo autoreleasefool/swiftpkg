@@ -67,16 +67,15 @@ extension Context {
 			let targetTable: TOMLTable?
 			switch target.definition.qualifier {
 			case .none:
-				targetTable = try? kindTable.requireTable(target.definition.name)
+				targetTable = kindTable[target.definition.name]?.table
 			case .interface:
-				targetTable = try? kindTable.requireTable("\(target.definition.name).interface")
+				targetTable = kindTable[target.definition.name]?.table?["interface"]?.table
 			case .test:
-				targetTable = try? kindTable.requireTable("\(target.definition.name).tests")
+				targetTable = kindTable[target.definition.name]?.table?["tests"]?.table
 			}
 
 			guard let targetTable else { continue }
 
-			print(rootKey)
 			if targetTable.contains(key: "dependencies") {
 				let dependencies = try targetTable.requireStringArray("dependencies").map { name in
 					guard let dependency = packageDependencies.first(where: { $0.name == name }) else {
