@@ -2,14 +2,14 @@ import Foundation
 
 class Target {
 	let definition: TargetDefinition
-	private(set) var targetDependencies: Set<String> = []
 	private(set) var dependencies: Set<String> = []
+	private(set) var defaultDependencies: Set<String> = []
 
 	init(definition: TargetDefinition) {
 		self.definition = definition
 	}
 
-	func add(dependencyOn dependency: TargetDefinition) throws {
+	func add(dependencyOn dependency: TargetDefinition, asDefault: Bool = false) throws {
 		switch definition.qualifier {
 		case .interface, .none:
 			guard definition.kind.supportedDependencies.contains(dependency.kind) else {
@@ -55,7 +55,10 @@ class Target {
 			}
 		}
 
-		let inserted = targetDependencies.insert("\"\(dependency.fullyQualifiedName)\"").inserted
+		let key = "\(dependency.fullyQualifiedName)"
+		let inserted = asDefault
+			? defaultDependencies.insert(key).inserted
+			: dependencies.insert(key).inserted
 
 		guard inserted || definition.fullyQualifiedName.contains(dependency.fullyQualifiedName) else {
 			throw DuplicateDependencyError(
@@ -65,12 +68,21 @@ class Target {
 		}
 	}
 
-	func add(dependencyOn dependency: Dependency) throws {
-		guard dependencies.insert(dependency.asDependable).inserted else {
+	func add(dependencyOn dependency: Dependency, asDefault: Bool = false) throws {
+		let key = dependency.asDependable
+		let inserted = asDefault
+			? defaultDependencies.insert(key).inserted
+			: dependencies.insert(key).inserted
+
+		guard inserted else {
 			throw DuplicateDependencyError(
 				targetName: definition.fullyQualifiedName,
 				dependencyName: dependency.name
 			)
 		}
+	}
+
+	func removeDefault(dependencyOn: String) {
+		defaultDependencies.remove(dependencyOn)
 	}
 }

@@ -51,7 +51,7 @@ extension Context {
 			for target in targets.values
 				where target.definition.kind == forKind && target.definition.qualifier == withQualifier {
 				for dependency in dependencies {
-					try target.add(dependencyOn: dependency)
+					try target.add(dependencyOn: dependency, asDefault: true)
 				}
 			}
 		}
@@ -75,7 +75,7 @@ extension Context {
 			for target in targets.values
 				where target.definition.kind == forKind && target.definition.qualifier == withQualifier {
 				for dependency in dependencies {
-					try target.add(dependencyOn: dependency)
+					try target.add(dependencyOn: dependency, asDefault: true)
 				}
 			}
 		}

@@ -57,7 +57,9 @@ struct Context {
 			"targets": targets.map { ($0.categoryName, $1.map {
 				(
 					name: $0.definition.fullyQualifiedName,
-					dependencies: $0.dependencies.sorted() + $0.targetDependencies.sorted(),
+					dependencies: $0.dependencies.union($0.defaultDependencies).sorted().map {
+						$0.starts(with: ".") ? $0 : "\"\($0)\""
+					},
 					targetType: $0.definition.qualifier.targetType
 				)
 			}) },
