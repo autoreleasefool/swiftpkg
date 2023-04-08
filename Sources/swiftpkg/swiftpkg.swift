@@ -6,22 +6,23 @@ import TOMLKit
 @main // swiftlint:disable:next type_name
 struct swiftpkg: AsyncParsableCommand {
 	@Argument(
-		help: "A file to import a TOML-defined Package.swift",
-		completion: .file(extensions: ["toml"]),
-		transform: URL.init(fileURLWithPath:)
-	)
-	var inputFile: URL
-
-	@Argument(
-		help: "Path where the package lives",
+		help: "Source directory for the package",
 		completion: .file(),
 		transform: URL.init(fileURLWithPath:)
 	)
-	var packageSource: URL
+	var package: URL
 
 	@Option(
 		name: .long,
-		help: "Output file for the Package.swift",
+		help: "Override. A file to import a TOML-defined Package.swift",
+		completion: .file(extensions: ["toml"]),
+		transform: URL.init(fileURLWithPath:)
+	)
+	var inputFile: URL?
+
+	@Option(
+		name: .long,
+		help: "Override. Output file for the Package.swift",
 		completion: .file(),
 		transform: URL.init(fileURLWithPath:)
 	)
@@ -34,17 +35,18 @@ struct swiftpkg: AsyncParsableCommand {
 	var warnMissingDependencies: Bool = false
 
 	mutating func run() async throws {
+		let inputFile = self.inputFile ?? package.appending(path: "Package.swift.toml")
 		let input = try String(contentsOf: inputFile)
 
 		let table = try TOMLTable(string: input)
 		let context = try Context(table)
 
 		if warnUnusedDependencies {
-			try context.warnUnusedDependencies(inPackage: packageSource)
+			try context.warnUnusedDependencies(inPackage: package)
 		}
 
 		if warnMissingDependencies {
-			try context.warnMissingDependencies(inPackage: packageSource)
+			try context.warnMissingDependencies(inPackage: package)
 		}
 
 		let environment = Environment(
@@ -56,7 +58,7 @@ struct swiftpkg: AsyncParsableCommand {
 			context: context.toDictionary()
 		)
 
-		let outputFile = self.outputFile ?? packageSource.appending(path: "Package.swift")
+		let outputFile = self.outputFile ?? package.appending(path: "Package.swift")
 		try rendered.data(using: .utf8)?.write(to: outputFile)
 	}
 }
