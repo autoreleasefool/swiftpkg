@@ -19,7 +19,7 @@ extension Context {
 		}
 	}
 
-	private static func resolveTransientDependencies(
+	static func resolveTransientDependencies(
 		for targetName: String,
 		in targets: [String: Target],
 		cache dependencyCache: inout [String: CachedDependencies]
