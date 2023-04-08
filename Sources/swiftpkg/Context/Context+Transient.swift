@@ -38,7 +38,7 @@ extension Context {
 		var transient: Set<String> = []
 		for dependency in dependencies {
 			let subTransient = try resolveTransientDependencies(for: dependency, in: targets, cache: &dependencyCache)
-			transient.formUnion(subTransient.dependencies)
+			transient.formUnion(subTransient.dependencies.union(subTransient.transient))
 		}
 
 		let cached = CachedDependencies(dependencies: dependencies, transient: transient)
