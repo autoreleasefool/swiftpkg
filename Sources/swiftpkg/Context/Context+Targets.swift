@@ -104,7 +104,8 @@ extension Context {
 							dependencyName: $0
 						)
 					}
-					return dependency.interface ?? dependency
+
+					return target.definition.qualifier == .test ? dependency : dependency.interface ?? dependency
 				}
 
 				for dependency in dependencies {
