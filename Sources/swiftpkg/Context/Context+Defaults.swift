@@ -75,7 +75,8 @@ extension Context {
 			for target in targets.values
 				where target.definition.kind == forKind && target.definition.qualifier == withQualifier {
 				for dependency in dependencies {
-					try target.add(dependencyOn: dependency, asDefault: true)
+					let dep = target.definition.qualifier == .test ? dependency : dependency.interface ?? dependency
+					try target.add(dependencyOn: dep, asDefault: true)
 				}
 			}
 		}
