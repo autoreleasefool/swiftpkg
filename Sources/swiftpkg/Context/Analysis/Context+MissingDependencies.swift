@@ -31,6 +31,4 @@ extension Context {
 			}
 		}
 	}
-
-	
 }

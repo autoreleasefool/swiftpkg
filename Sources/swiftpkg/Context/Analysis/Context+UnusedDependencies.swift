@@ -10,7 +10,7 @@ extension Context {
 		"MapKit",
 		"SwiftUI",
 		"UIKit",
-		"XCTest"
+		"XCTest",
 	]
 
 	func warnUnusedDependencies(inPackage packageURL: URL) throws {
