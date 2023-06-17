@@ -44,6 +44,10 @@ extension Context {
 					targets[testTarget.definition.fullyQualifiedName] = testTarget
 				}
 
+				if targetTable.contains(key: "resources") {
+					try target.addResources(from: targetTable.requireTable("resources"))
+				}
+
 				definitions[kind]?[targetKey] = definition
 				targets[definition.fullyQualifiedName] = target
 			}

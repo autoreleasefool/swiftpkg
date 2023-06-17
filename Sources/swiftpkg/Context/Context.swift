@@ -12,6 +12,7 @@ struct Context {
 		"dependencies",
 		"skip_tests",
 		"suitable_for_dependents_matching",
+		"resources",
 	])
 
 	init(_ table: TOMLTable) throws {
@@ -54,6 +55,7 @@ struct Context {
 				dependencies: $0.dependencies.union($0.defaultDependencies).sorted().map {
 					$0.starts(with: ".") ? $0 : "\"\($0)\""
 				},
+				resources: $0.resources,
 				targetType: $0.definition.qualifier.targetType
 			)
 		})

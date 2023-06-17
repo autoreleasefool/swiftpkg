@@ -1,9 +1,11 @@
 import Foundation
+import TOMLKit
 
 class Target {
 	let definition: TargetDefinition
 	private(set) var dependencies: Set<String> = []
 	private(set) var defaultDependencies: Set<String> = []
+	private(set) var resources: [String] = []
 
 	init(definition: TargetDefinition) {
 		self.definition = definition
@@ -79,6 +81,20 @@ class Target {
 				targetName: definition.fullyQualifiedName,
 				dependencyName: dependency.name
 			)
+		}
+	}
+
+	func addResources(from resourceTable: TOMLTable) throws {
+		if resourceTable.contains(key: "processed") {
+			for resource in try resourceTable.requireStringArray("processed") {
+				resources.append(String(describing: Resource(name: resource, rule: .process)))
+			}
+		}
+
+		if resourceTable.contains(key: "copied") {
+			for resource in try resourceTable.requireStringArray("copied") {
+				resources.append(String(describing: Resource(name: resource, rule: .copy)))
+			}
 		}
 	}
 
