@@ -10,6 +10,7 @@ extension Context {
 		"MapKit",
 		"SwiftUI",
 		"UIKit",
+		"UniformTypeIdentifiers",
 		"XCTest",
 	]
 
