@@ -8,6 +8,7 @@ extension Context {
 		"CoreLocation",
 		"Foundation",
 		"MapKit",
+		"MessageUI",
 		"SwiftUI",
 		"UIKit",
 		"UniformTypeIdentifiers",
