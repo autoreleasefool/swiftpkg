@@ -1,3 +1,4 @@
+import Foundation
 import TOMLKit
 
 struct Context {
@@ -68,10 +69,15 @@ struct Context {
 			)
 		}.map { ($0.categoryName, $1.map(\.fullyQualifiedName)) }
 
+		var dependencyUrls: Set<URL> = []
+		let dedupedDependencies = dependencies.filter {
+			dependencyUrls.insert($0.url).inserted
+		}
+
 		return [
 			"package": package,
 			"platforms": platforms,
-			"dependencies": dependencies,
+			"dependencies": dedupedDependencies,
 			"targets": targets,
 			"products": products,
 		]
