@@ -1,7 +1,7 @@
 import Foundation
 
 extension Context {
-	private static let importRegex = #/^(@testable )?import (.*)$/#
+	private static let importRegex = #/^(@testable|@_exported )?import (.*)$/#
 
 	static func findUsedDependencies(
 		inPackage packageURL: URL,
