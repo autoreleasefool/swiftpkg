@@ -28,7 +28,7 @@ struct Dependency: Hashable {
 			self.version = .from(try table.requireString("from"))
 		} else if table.contains(key: "revision") {
 			self.version = .revision(try table.requireString("revision"))
-		} else if table.contains(element: "branch") {
+		} else if table.contains(key: "branch") {
 			self.version = .branch(try table.requireString("branch"))
 		} else {
 			throw MissingKeyError(key: "version (from/revision/branch)")

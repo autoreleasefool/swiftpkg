@@ -9,6 +9,7 @@ extension Context {
 		"Foundation",
 		"MapKit",
 		"MessageUI",
+		"StoreKit",
 		"SwiftUI",
 		"UIKit",
 		"UniformTypeIdentifiers",
