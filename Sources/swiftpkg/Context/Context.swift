@@ -19,9 +19,16 @@ struct Context {
 	init(_ table: TOMLTable) throws {
 		self.package = try PackageDefinition(table)
 
+		let versionRefs: [String: Version]
+		if table.contains(key: "versionRefs") {
+			versionRefs = try Self.parseVersionRefs(table.requireTable("versionRefs"))
+		} else {
+			versionRefs = [:]
+		}
+
 		let dependencies: [Dependency]
 		if table.contains(key: "dependencies") {
-			dependencies = try Self.parseDependencies(table.requireTable("dependencies"))
+			dependencies = try Self.parseDependencies(table.requireTable("dependencies"), versionRefs: versionRefs)
 		} else {
 			dependencies = []
 		}
