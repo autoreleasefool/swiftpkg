@@ -12,6 +12,7 @@ struct Context {
 		"tests",
 		"dependencies",
 		"skip_tests",
+		"skip_interface",
 		"suitable_for_dependents_matching",
 		"resources",
 	])
@@ -19,16 +20,16 @@ struct Context {
 	init(_ table: TOMLTable) throws {
 		self.package = try PackageDefinition(table)
 
-		let versionRefs: [String: Version]
-		if table.contains(key: "versionRefs") {
-			versionRefs = try Self.parseVersionRefs(table.requireTable("versionRefs"))
+		let sharedRefs: [String: SharedRef]
+		if table.contains(key: "sharedRefs") {
+			sharedRefs = try Self.parseSharedRefs(table.requireTable("sharedRefs"))
 		} else {
-			versionRefs = [:]
+			sharedRefs = [:]
 		}
 
 		let dependencies: [Dependency]
 		if table.contains(key: "dependencies") {
-			dependencies = try Self.parseDependencies(table.requireTable("dependencies"), versionRefs: versionRefs)
+			dependencies = try Self.parseDependencies(table.requireTable("dependencies"), sharedRefs: sharedRefs)
 		} else {
 			dependencies = []
 		}

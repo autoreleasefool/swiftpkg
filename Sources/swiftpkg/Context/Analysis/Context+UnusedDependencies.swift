@@ -3,12 +3,14 @@ import Foundation
 extension Context {
 	static let productRegex = #/\.product\(name: "(.*?)"/#
 	static let ignoredDependencies: Set<String> = [
+		"AppKit",
 		"Charts",
 		"Combine",
 		"CoreLocation",
 		"Foundation",
 		"MapKit",
 		"MessageUI",
+		"OSLog",
 		"StoreKit",
 		"SwiftUI",
 		"UIKit",

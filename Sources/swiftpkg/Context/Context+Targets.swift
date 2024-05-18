@@ -19,6 +19,7 @@ extension Context {
 
 				let targetTable = try kindTable.requireTable(targetKey)
 				let skipTests = targetTable["skip_tests"]?.bool ?? false
+				let skipInterface = targetTable["skip_interface"]?.bool ?? false
 				let suitableForDependentsMatching = targetTable["suitable_for_dependents_matching"]?.string ?? nil
 
 				let definition = TargetDefinition(
@@ -29,7 +30,7 @@ extension Context {
 				)
 				let target = Target(definition: definition)
 
-				if let interface = definition.interface {
+				if let interface = definition.interface, !skipInterface {
 					try target.add(dependencyOn: interface)
 
 					let interfaceTarget = Target(definition: interface)
