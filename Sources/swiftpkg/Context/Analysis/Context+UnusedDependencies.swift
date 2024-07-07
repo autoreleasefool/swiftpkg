@@ -11,6 +11,8 @@ extension Context {
 		"MapKit",
 		"MessageUI",
 		"OSLog",
+		"Photos",
+		"PhotosUI",
 		"StoreKit",
 		"SwiftUI",
 		"UIKit",
