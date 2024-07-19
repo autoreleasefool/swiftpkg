@@ -29,12 +29,14 @@ extension Context {
 					suitableForDependentsMatching: suitableForDependentsMatching
 				)
 				let target = Target(definition: definition)
+				var subTargets: [Target] = []
 
 				if let interface = definition.interface, !skipInterface {
 					try target.add(dependencyOn: interface)
 
 					let interfaceTarget = Target(definition: interface)
 					targets[interfaceTarget.definition.fullyQualifiedName] = interfaceTarget
+					subTargets.append(interfaceTarget)
 				}
 
 				if !skipTests {
@@ -43,10 +45,18 @@ extension Context {
 					let testTarget = Target(definition: tests)
 					try testTarget.add(dependencyOn: definition)
 					targets[testTarget.definition.fullyQualifiedName] = testTarget
+					subTargets.append(testTarget)
 				}
 
 				if targetTable.contains(key: "resources") {
 					try target.addResources(from: targetTable.requireTable("resources"))
+				}
+
+				if targetTable.contains(key: "swift_settings") {
+					for setting in try targetTable.requireStringArray("swift_settings") {
+						target.add(swiftSetting: setting)
+						subTargets.forEach { $0.add(swiftSetting: setting) }
+					}
 				}
 
 				definitions[kind]?[targetKey] = definition

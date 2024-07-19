@@ -6,6 +6,7 @@ class Target {
 	private(set) var dependencies: Set<String> = []
 	private(set) var defaultDependencies: Set<String> = []
 	private(set) var resources: [String] = []
+	private(set) var swiftSettings: [String] = []
 
 	init(definition: TargetDefinition) {
 		self.definition = definition
@@ -96,6 +97,10 @@ class Target {
 				resources.append(String(describing: Resource(name: resource, rule: .copy)))
 			}
 		}
+	}
+
+	func add(swiftSetting: String) {
+		swiftSettings.append(swiftSetting)
 	}
 
 	func removeDefault(dependencyOn: String) {

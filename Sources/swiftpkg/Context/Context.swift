@@ -15,21 +15,34 @@ struct Context {
 		"skip_interface",
 		"suitable_for_dependents_matching",
 		"resources",
+		"swift_settings",
 	])
 
 	init(_ table: TOMLTable) throws {
 		self.package = try PackageDefinition(table)
 
-		let sharedRefs: [String: SharedRef]
-		if table.contains(key: "sharedRefs") {
-			sharedRefs = try Self.parseSharedRefs(table.requireTable("sharedRefs"))
+		let sharedDepRefs: [String: DependencyRef]
+		let sharedSwiftSettings: [String]
+		if table.contains(key: "shared") {
+			let sharedTable = try table.requireTable("shared")
+			sharedDepRefs = if sharedTable.contains(key: "refs") {
+				try Self.parseDependencyRefs(sharedTable.requireTable("refs"))
+			} else {
+				[:]
+			}
+			sharedSwiftSettings = if sharedTable.contains(key: "swift_settings") {
+				try sharedTable.requireStringArray("swift_settings")
+			} else {
+				[]
+			}
 		} else {
-			sharedRefs = [:]
+			sharedDepRefs = [:]
+			sharedSwiftSettings = []
 		}
 
 		let dependencies: [Dependency]
 		if table.contains(key: "dependencies") {
-			dependencies = try Self.parseDependencies(table.requireTable("dependencies"), sharedRefs: sharedRefs)
+			dependencies = try Self.parseDependencies(table.requireTable("dependencies"), depRefs: sharedDepRefs)
 		} else {
 			dependencies = []
 		}
@@ -45,6 +58,12 @@ struct Context {
 
 		if table.contains(key: "defaults") {
 			try Self.parseDefaults(targets, definitions, dependencies, table.requireTable("defaults"))
+		}
+
+		for swiftSwetting in sharedSwiftSettings {
+			for target in targets.values {
+				target.add(swiftSetting: swiftSwetting)
+			}
 		}
 
 		try Self.resolveTransientDependencies(in: targets)
@@ -65,6 +84,7 @@ struct Context {
 					$0.starts(with: ".") ? $0 : "\"\($0)\""
 				},
 				resources: $0.resources,
+				swiftSettings: $0.swiftSettings,
 				targetType: $0.definition.qualifier.targetType
 			)
 		})

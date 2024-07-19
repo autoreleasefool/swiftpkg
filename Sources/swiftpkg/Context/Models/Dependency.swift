@@ -21,15 +21,15 @@ struct Dependency: Hashable {
 		String((try? Self.packageRegex.wholeMatch(in: url.absoluteString)?.output.1) ?? "")
 	}
 
-	init(name: String, table: TOMLTable, sharedRefs: [String: SharedRef]) throws {
+	init(name: String, table: TOMLTable, depRefs: [String: DependencyRef]) throws {
 		self.name = name
-		var sharedRef: SharedRef?
-		if let sharedRefKey = table["sharedRef"]?.string {
-			sharedRef = sharedRefs[sharedRefKey]
+		var depRef: DependencyRef?
+		if let depRefKey = table["dep_ref"]?.string {
+			depRef = depRefs[depRefKey]
 		}
 
-		self.url = try sharedRef?.url ?? table.requireURL("url")
-		self.version = try sharedRef?.version ?? Version(table: table)
+		self.url = try depRef?.url ?? table.requireURL("url")
+		self.version = try depRef?.version ?? Version(table: table)
 	}
 }
 

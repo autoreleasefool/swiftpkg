@@ -1,7 +1,7 @@
 import Foundation
 import TOMLKit
 
-struct SharedRef {
+struct DependencyRef {
 	let url: URL?
 	let version: Version?
 
