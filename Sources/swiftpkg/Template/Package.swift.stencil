@@ -13,8 +13,8 @@ let package = Package(
 		.library(name: "{{ target }}", targets: ["{{ target }}"]),{% endfor %}{% if not forloop.last %}
 {% endif %}{% endfor %}
 	],
-	dependencies: [{% for dependency in dependencies %}
-		.package(url: "{{ dependency.url }}", {{ dependency.version }}),{% endfor %}
+	dependencies: [{% for dependency in packagedDependencies %}
+		{{ dependency }},{% endfor %}
 	],
 	targets: [{% for kind, targets in targets %}
 		// MARK: - {{ kind }}{% for target, dependencies, resources, swiftSettings, type in targets %}

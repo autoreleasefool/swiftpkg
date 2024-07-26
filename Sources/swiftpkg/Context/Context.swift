@@ -97,15 +97,15 @@ struct Context {
 			)
 		}.map { ($0.categoryName, $1.map(\.fullyQualifiedName)) }
 
-		var dependencyUrls: Set<URL> = []
+		var dependencyNames: Set<String> = []
 		let dedupedDependencies = dependencies.filter {
-			dependencyUrls.insert($0.url).inserted
-		}
+			dependencyNames.insert($0.id).inserted
+		}.map(\.packaged)
 
 		return [
 			"package": package,
 			"platforms": platforms,
-			"dependencies": dedupedDependencies,
+			"packagedDependencies": dedupedDependencies,
 			"targets": targets,
 			"products": products,
 		]

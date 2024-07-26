@@ -1,7 +1,63 @@
 import Foundation
 import TOMLKit
 
-struct Dependency: Hashable {
+enum Dependency: Hashable, Identifiable {
+	case remote(RemoteDependency)
+	case local(LocalDependency)
+
+	init(name: String, table: TOMLTable, depRefs: [String: DependencyRef]) throws {
+		if table.contains(key: "path") {
+			self = try .local(LocalDependency(name: name, table: table))
+		} else {
+			self = try .remote(RemoteDependency(name: name, table: table, depRefs: depRefs))
+		}
+	}
+
+	var id: String {
+		switch self {
+		case let .local(local): local.id
+		case let .remote(remote): remote.id
+		}
+	}
+
+	var asDependable: String {
+		switch self {
+		case let .local(local): local.asDependable
+		case let .remote(remote): remote.asDependable
+		}
+	}
+
+	var name: String {
+		switch self {
+		case let .local(local): local.name
+		case let .remote(remote): remote.name
+		}
+	}
+
+	var packaged: String {
+		switch self {
+		case let .remote(remote): ".package(url: \"\(remote.url)\", \(remote.version))"
+		case let .local(local): ".package(path: \"\(local.path)\")"
+		}
+	}
+}
+
+struct LocalDependency: Hashable, Identifiable {
+	let name: String
+	let path: String
+	var id: String { path }
+
+	var asDependable: String {
+		".product(name: \"\(name)\", package: \"\(name)\")"
+	}
+
+	init(name: String, table: TOMLTable) throws {
+		self.name = name
+		self.path = try table.requireString("path")
+	}
+}
+
+struct RemoteDependency: Hashable, Identifiable {
 	private static let packageRegex: Regex = {
 		guard let regex = try? Regex("https://github\\.com/.*?/(.*)\\.git", as: (Substring, Substring).self) else {
 			fatalError("Failed to generate regex")
@@ -12,6 +68,8 @@ struct Dependency: Hashable {
 	let name: String
 	let url: URL
 	let version: Version
+
+	var id: String { url.absoluteString }
 
 	var asDependable: String {
 		".product(name: \"\(name)\", package: \"\(package)\")"
