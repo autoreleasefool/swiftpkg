@@ -6,10 +6,16 @@ enum Dependency: Hashable, Identifiable {
 	case local(LocalDependency)
 
 	init(name: String, table: TOMLTable, depRefs: [String: DependencyRef]) throws {
-		if table.contains(key: "path") {
-			self = try .local(LocalDependency(name: name, table: table))
+		let depRef: DependencyRef? = if let depRefKey = table["dep_ref"]?.string {
+			depRefs[depRefKey]
 		} else {
-			self = try .remote(RemoteDependency(name: name, table: table, depRefs: depRefs))
+			nil
+		}
+
+		if table.contains(key: "path") || depRef?.path != nil {
+			self = try .local(LocalDependency(name: name, table: table, depRef: depRef))
+		} else {
+			self = try .remote(RemoteDependency(name: name, table: table, depRef: depRef))
 		}
 	}
 
@@ -45,15 +51,18 @@ enum Dependency: Hashable, Identifiable {
 struct LocalDependency: Hashable, Identifiable {
 	let name: String
 	let path: String
+	let package: String
+
 	var id: String { path }
 
 	var asDependable: String {
-		".product(name: \"\(name)\", package: \"\(name)\")"
+		".product(name: \"\(name)\", package: \"\(package)\")"
 	}
 
-	init(name: String, table: TOMLTable) throws {
+	init(name: String, table: TOMLTable, depRef: DependencyRef?) throws {
 		self.name = name
-		self.path = try table.requireString("path")
+		self.path = try depRef?.path ?? table.requireString("path")
+		self.package = depRef?.packageName ?? table["package_name"]?.string ?? name
 	}
 }
 
@@ -79,13 +88,8 @@ struct RemoteDependency: Hashable, Identifiable {
 		String((try? Self.packageRegex.wholeMatch(in: url.absoluteString)?.output.1) ?? "")
 	}
 
-	init(name: String, table: TOMLTable, depRefs: [String: DependencyRef]) throws {
+	init(name: String, table: TOMLTable, depRef: DependencyRef?) throws {
 		self.name = name
-		var depRef: DependencyRef?
-		if let depRefKey = table["dep_ref"]?.string {
-			depRef = depRefs[depRefKey]
-		}
-
 		self.url = try depRef?.url ?? table.requireURL("url")
 		self.version = try depRef?.version ?? Version(table: table)
 	}

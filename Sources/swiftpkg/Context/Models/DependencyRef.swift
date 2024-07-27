@@ -4,22 +4,37 @@ import TOMLKit
 struct DependencyRef {
 	let url: URL?
 	let version: Version?
+	let path: String?
+	let packageName: String?
 
 	init(table: TOMLTable) throws {
-		if table.contains(key: "from") {
-			version = .from(try table.requireString("from"))
-		} else if table.contains(key: "revision") {
-			version = .revision(try table.requireString("revision"))
-		} else if table.contains(key: "branch") {
-			version = .branch(try table.requireString("branch"))
+		packageName = if table.contains(key: "package_name") {
+			try table.requireString("package_name")
 		} else {
-			version = nil
+			nil
 		}
 
-		if table.contains(key: "url") {
-			url = try table.requireURL("url")
+		if table.contains(key: "from") {
+			version = .from(try table.requireString("from"))
+			path = nil
+		} else if table.contains(key: "revision") {
+			version = .revision(try table.requireString("revision"))
+			path = nil
+		} else if table.contains(key: "branch") {
+			version = .branch(try table.requireString("branch"))
+			path = nil
+		} else if table.contains(key: "path") {
+			path = try table.requireString("path")
+			version = nil
 		} else {
-			url = nil
+			version = nil
+			path = nil
+		}
+
+		url = if table.contains(key: "url") {
+			try table.requireURL("url")
+		} else {
+			nil
 		}
 	}
 }
