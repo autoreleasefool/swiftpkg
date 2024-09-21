@@ -7,6 +7,8 @@ struct Context {
 	let dependencies: [Dependency]
 	let targets: [String: Target]
 
+	let productRegex = #/\.product\(name: "(.*?)"/#
+
 	static let reservedKeywords = Set([
 		"interface",
 		"tests",

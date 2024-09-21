@@ -1,7 +1,6 @@
 import Foundation
 
 extension Context {
-	static let productRegex = #/\.product\(name: "(.*?)"/#
 	static let ignoredDependencies: Set<String> = [
 		"AppKit",
 		"Charts",
@@ -29,7 +28,7 @@ extension Context {
 				try Self.resolveTransientDependencies(for: targetName, in: targets, cache: &cache)
 				.dependencies.map {
 					if $0.starts(with: ".") {
-						return String($0.firstMatch(of: Self.productRegex)?.1 ?? "")
+						return String($0.firstMatch(of: productRegex)?.1 ?? "")
 					} else {
 						return $0
 					}

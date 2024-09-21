@@ -1,12 +1,12 @@
 import Foundation
 
 extension Context {
-	private static let importRegex = #/^(@testable|@_exported )?import (.*)$/#
-
 	static func findUsedDependencies(
 		inPackage packageURL: URL,
 		forTarget targetName: String
 	) throws -> Set<String> {
+		let importRegex = #/^(@testable|@_exported )?import (.*)$/#
+
 		var dependencies: Set<String> = []
 		for file in sourceFiles(inPackage: packageURL, forTarget: targetName) {
 			let source = try String(contentsOf: file)

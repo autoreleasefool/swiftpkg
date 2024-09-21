@@ -12,7 +12,7 @@ extension Context {
 					.union(dependencies.transient)
 					.union(target.defaultDependencies).map {
 						if $0.starts(with: ".") {
-							return String($0.firstMatch(of: Self.productRegex)?.1 ?? "")
+							return String($0.firstMatch(of: productRegex)?.1 ?? "")
 						} else {
 							return $0
 						}
