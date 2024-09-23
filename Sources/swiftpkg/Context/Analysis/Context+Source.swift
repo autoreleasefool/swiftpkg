@@ -5,7 +5,7 @@ extension Context {
 		inPackage packageURL: URL,
 		forTarget targetName: String
 	) throws -> Set<String> {
-		let importRegex = #/^(@testable|@_exported )?import (.*)$/#
+		let importRegex = #/^(@testable|@_exported|@preconcurrency)? ?import (.*)$/#
 
 		var dependencies: Set<String> = []
 		for file in sourceFiles(inPackage: packageURL, forTarget: targetName) {
