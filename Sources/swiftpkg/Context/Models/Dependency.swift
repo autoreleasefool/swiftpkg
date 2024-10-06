@@ -78,14 +78,12 @@ struct RemoteDependency: Hashable, Identifiable {
 	}
 
 	var package: String {
-		let packageRegex: Regex = {
-			guard let regex = try? Regex("https://github\\.com/.*?/(.*)\\.git", as: (Substring, Substring).self) else {
-				fatalError("Failed to generate regex")
-			}
-			return regex
-		}()
-
-		return String((try? packageRegex.wholeMatch(in: url.absoluteString)?.output.1) ?? "")
+		let packageRegex = /.*\/(.*?)(\.git)?$/
+		if let match = try? packageRegex.wholeMatch(in: url.absoluteString) {
+			return String(match.1)
+		} else {
+			return ""
+		}
 	}
 
 	init(name: String, table: TOMLTable, depRef: DependencyRef?) throws {
