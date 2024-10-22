@@ -10,14 +10,16 @@ struct Context {
 	let productRegex = #/\.product\(name: "(.*?)"/#
 
 	static let reservedKeywords = Set([
-		"interface",
-		"tests",
+		"copied",
 		"dependencies",
+		"interface",
+		"processed",
+		"resources",
 		"skip_tests",
 		"skip_interface",
 		"suitable_for_dependents_matching",
-		"resources",
 		"swift_settings",
+		"tests",
 	])
 
 	init(_ table: TOMLTable) throws {

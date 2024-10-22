@@ -37,6 +37,10 @@ extension Context {
 					let interfaceTarget = Target(definition: interface)
 					targets[interfaceTarget.definition.fullyQualifiedName] = interfaceTarget
 					subTargets.append(interfaceTarget)
+
+					if let interfaceTable = targetTable["interface"]?.table {
+						try processArguments(forTarget: interfaceTarget, withTable: interfaceTable)
+					}
 				}
 
 				if !skipTests {
@@ -46,27 +50,34 @@ extension Context {
 					try testTarget.add(dependencyOn: definition)
 					targets[testTarget.definition.fullyQualifiedName] = testTarget
 					subTargets.append(testTarget)
-				}
 
-				if targetTable.contains(key: "resources") {
-					try target.addResources(from: targetTable.requireTable("resources"))
-				}
-
-				if targetTable.contains(key: "swift_settings") {
-					for setting in try targetTable.requireStringArray("swift_settings") {
-						target.add(swiftSetting: setting)
-						subTargets.forEach { $0.add(swiftSetting: setting) }
+					if let testTable = targetTable["tests"]?.table {
+						try processArguments(forTarget: testTarget, withTable: testTable)
 					}
 				}
+
+				try processArguments(forTarget: target, withTable: targetTable)
 
 				definitions[kind]?[targetKey] = definition
 				targets[definition.fullyQualifiedName] = target
 			}
 		}
 
-		try Self.expandDependencies(targets, definitions, dependencies, table)
+		try expandDependencies(targets, definitions, dependencies, table)
 
 		return (definitions, targets)
+	}
+
+	private static func processArguments(forTarget target: Target, withTable targetTable: TOMLTable) throws {
+		if targetTable.contains(key: "resources") {
+			try target.addResources(from: targetTable.requireTable("resources"))
+		}
+
+		if targetTable.contains(key: "swift_settings") {
+			for setting in try targetTable.requireStringArray("swift_settings") {
+				target.add(swiftSetting: setting)
+			}
+		}
 	}
 
 	static func expandDependencies(
