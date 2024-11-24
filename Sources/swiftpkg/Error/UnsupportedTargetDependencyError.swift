@@ -7,6 +7,6 @@ struct UnsupportedTargetDependencyError: Error, LocalizedError {
 	let dependencyKind: TargetDefinition.Kind
 
 	var errorDescription: String? {
-		return "Target \(targetName) of kind \(targetKind) cannot depend on \(dependencyName) of kind \(dependencyKind)"
+		"Target \(targetName) of kind \(targetKind) cannot depend on \(dependencyName) of kind \(dependencyKind)"
 	}
 }

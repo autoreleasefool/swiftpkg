@@ -7,10 +7,8 @@ on:
   pull_request:
     paths:
       - ".github/workflows/swiftlint.yml"
-      - "Sources/"
-      - "Tests/"
-      - "Package.swift"
       - ".swiftlint.yml"
+      - "**.swift"
 
 concurrency:
   group: swiftlint-${{ github.ref }}
@@ -20,6 +18,6 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: SwiftLint
         uses: norio-nomura/action-swiftlint@3.2.1

@@ -79,32 +79,42 @@ struct Context {
 			$0.definition.fullyQualifiedName < $1.definition.fullyQualifiedName
 		}
 
-		let targets = TargetDefinition.Kind.allCases.map { kind in
-			(kind, sortedTargets.filter { $0.definition.kind == kind })
-		}.map { ($0.categoryName, $1.map {
-			(
-				name: $0.definition.fullyQualifiedName,
-				dependencies: $0.dependencies.union($0.defaultDependencies).sorted().map {
-					$0.starts(with: ".") ? $0 : "\"\($0)\""
-				},
-				resources: $0.resources,
-				swiftSettings: $0.swiftSettings,
-				targetType: $0.definition.qualifier.targetType
-			)
-		})
-		}
+		let targets = TargetDefinition.Kind.allCases
+			.map { kind in
+				(kind, sortedTargets.filter { $0.definition.kind == kind })
+			}
+			.map {
+				(
+					$0.categoryName,
+					$1.map {
+						(
+							name: $0.definition.fullyQualifiedName,
+							dependencies: $0.dependencies.union($0.defaultDependencies).sorted().map {
+								$0.starts(with: ".") ? $0 : "\"\($0)\""
+							},
+							resources: $0.resources,
+							swiftSettings: $0.swiftSettings,
+							targetType: $0.definition.qualifier.targetType
+						)
+					}
+				)
+			}
 
-		let products = TargetDefinition.Kind.allCases.map { kind in
-			(
-				kind,
-				sortedTargets.filter { $0.definition.kind == kind && $0.definition.isProduct }.map(\.definition)
-			)
-		}.map { ($0.categoryName, $1.map(\.fullyQualifiedName)) }
+		let products = TargetDefinition.Kind.allCases
+			.map { kind in
+				(
+					kind,
+					sortedTargets.filter { $0.definition.kind == kind && $0.definition.isProduct }.map(\.definition)
+				)
+			}
+			.map { ($0.categoryName, $1.map(\.fullyQualifiedName)) }
 
 		var dependencyNames: Set<String> = []
-		let dedupedDependencies = dependencies.filter {
-			dependencyNames.insert($0.id).inserted
-		}.map(\.packaged)
+		let dedupedDependencies = dependencies
+			.filter {
+				dependencyNames.insert($0.id).inserted
+			}
+			.map(\.packaged)
 
 		return [
 			"package": package,

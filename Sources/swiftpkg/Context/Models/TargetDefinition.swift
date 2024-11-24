@@ -22,7 +22,7 @@ struct TargetDefinition: Hashable {
 	}
 
 	var interface: TargetDefinition? {
-		return kind.requiresInterface
+		kind.requiresInterface
 			? .init(name: name, kind: kind, qualifier: .interface, suitableForDependentsMatching: suitableForDependentsMatching)
 			: nil
 	}
