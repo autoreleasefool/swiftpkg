@@ -53,12 +53,33 @@ struct swiftpkg: AsyncParsableCommand {
 			loader: FileSystemLoader(bundle: [Bundle.main, Bundle.module])
 		)
 
-		let rendered = try environment.renderTemplate(
-			name: "Contents/Resources/Template/Package.swift.stencil",
-			context: context.toDictionary()
-		)
+		let rendered = try renderTemplate(environment: environment, context: context.toDictionary())
 
 		let outputFile = self.outputFile ?? package.appending(path: "Package.swift")
 		try rendered.data(using: .utf8)?.write(to: outputFile)
+	}
+
+	private func renderTemplate(environment: Environment, context: [String: Any]) throws -> String {
+		let names = [
+			"Contents/Resources/Template/Package.swift.stencil",
+			"Resources/Template/Package.swift.stencil",
+			"Template/Package.swift.stencil",
+			"Package.swift.stencil",
+		]
+
+		var errorsThrown: [Error] = []
+		for name in names {
+			do {
+				return try environment.renderTemplate(name: name, context: context)
+			} catch {
+				errorsThrown.append(error)
+			}
+		}
+
+		if let error = errorsThrown.first {
+			throw error
+		}
+
+		return ""
 	}
 }
