@@ -20,7 +20,7 @@ extension Context {
 					}
 			)
 			let usedDependencies = try Self.findUsedDependencies(inPackage: packageURL, forTarget: targetName)
-				.subtracting(Self.ignoredDependencies)
+				.subtracting(SystemDependencies.all)
 
 			let missingDependencies = usedDependencies.subtracting(transientDependencies)
 

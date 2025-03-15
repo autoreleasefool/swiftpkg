@@ -1,24 +1,6 @@
 import Foundation
 
 extension Context {
-	static let ignoredDependencies: Set<String> = [
-		"AppKit",
-		"Charts",
-		"Combine",
-		"CoreLocation",
-		"Foundation",
-		"MapKit",
-		"MessageUI",
-		"OSLog",
-		"Photos",
-		"PhotosUI",
-		"StoreKit",
-		"SwiftUI",
-		"UIKit",
-		"UniformTypeIdentifiers",
-		"XCTest",
-	]
-
 	func warnUnusedDependencies(inPackage packageURL: URL) throws {
 		var cache: [String: CachedDependencies] = [:]
 		for (targetName, target) in targets {
@@ -35,7 +17,7 @@ extension Context {
 				}
 			).subtracting(target.defaultDependencies)
 			let usedDependencies = try Self.findUsedDependencies(inPackage: packageURL, forTarget: targetName)
-				.subtracting(Self.ignoredDependencies)
+				.subtracting(SystemDependencies.all)
 
 			let unusedDependencies = definedDependencies.subtracting(usedDependencies)
 
